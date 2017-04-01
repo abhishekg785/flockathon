@@ -1,0 +1,35 @@
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <%= userId %>
+  <textarea id="message" placeholder="Enter message here"></textarea>
+  <button id="send">Send</button>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://apps-static.flock.co/js-sdk/0.1.0/flock.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $('#send').click(function(e) {
+        // alert("Clicked");
+        e.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "https://359cae17.ngrok.io/flock/api/v0.1/tagger",
+          data: {
+            'userId': '<%= userId %>',
+            'message': $('#message').val()
+          },
+          dataType : 'json',
+          success: function(result) {
+            flock.close();
+          },
+          error: function(result) {
+            flock.close();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
