@@ -5,6 +5,8 @@
 
 <body>
   <h1>Chat Outcomes</h1>
+  <div id="chatOutcome"></div>
+  <div id="visualSVG"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.js"></script>
   <script>
@@ -13,11 +15,12 @@
 
     _Functions = {
       createStatisticsGraph: function(obj) {
-        var heightFactor = 5,
-          svgHeight = 800,
-          svgWidth = 500,
-          barPadding = 3,
-          svgTextPdding = 5;
+        document.getElementById("visualSVG").innerHTML = "";
+        var heightFactor = 300,
+          svgHeight = 300,
+          svgWidth = 250,
+          barPadding = 1,
+          svgTextPdding = 2;
 
         var visualSVG = d3.select('#visualSVG').append('svg')
           .attr('height', svgHeight)
@@ -28,8 +31,40 @@
           .append('rect')
           .attr('height', function(d) {
             console.log(d);
-            // return heightFactor * d.value;
+            return heightFactor * d.val;
           })
+          .attr('width', function(d) {
+            return svgWidth / obj.length - barPadding;
+          })
+          .attr('x', function(d, i) {
+            return i * (svgWidth / obj.length);
+          })
+          .attr('y', function(d) {
+            return svgHeight - heightFactor * d.val;
+          })
+          .text(function(d) {
+            return d.val;
+          })
+          .attr('fill', 'white')
+          .attr('color', 'black')
+          .attr('stroke', 'black')
+
+        function createSVGtexts() {
+          var visualText = visualSVG.selectAll('text')
+            .data(obj)
+            .enter()
+            .append('text')
+            .attr('x', function(d, i) {
+              return i * (svgWidth / obj.length);
+            })
+            .attr('y', function(d) {
+              return (svgHeight - svgTextPdding);
+            })
+            .text(function(d) {
+              return d.mood;
+            })
+        }
+        createSVGtexts();
       }
     }
     // socket.on('mood detect', function(mood) {
@@ -37,14 +72,52 @@
     // });
     socket.on('mood detect', function(mood) {
       console.log(mood);
+      if (mood['mood']) {
+        document.getElementById("chatOutcome").innerHTML = mood['mood'];
+      } else {
+        document.getElementById("chatOutcome").innerHTML = "Will get the result ASAP";
+      }
     });
 
     socket.on('mood statistics', function(moodStats) {
       console.log('mood statistics');
+      var dataArr = {
+        'anger': '',
+        'disgust': '',
+        'fear': '',
+        'joy': '',
+        'sadness': ''
+      }
       var dataArr = [];
-      console.log(moodStats.mood.keywords[0]);
-      var obj = moodStats.mood.keywords[0]['emotion'];
-      console.log(obj);
+      if (moodStats != 'no data') {
+        var moodObj = moodStats.mood.keywords[0]['emotion'];
+        if (moodObj != undefined) {
+          dataArr.push({
+            'mood': 'anger',
+            'val': moodObj['anger']
+          });
+          dataArr.push({
+            'mood': 'disgust',
+            'val': moodObj['disgust']
+          });
+          dataArr.push({
+            'mood': 'fear',
+            'val': moodObj['fear']
+          });
+          dataArr.push({
+            'mood': 'joy',
+            'val': moodObj['joy']
+          });
+          dataArr.push({
+            'mood': 'sadness',
+            'val': moodObj['sadness']
+          });
+          console.log(dataArr);
+          _Functions.createStatisticsGraph(dataArr);
+        }
+      } else {
+        console.log('no data');
+      }
     });
   </script>
 </body>

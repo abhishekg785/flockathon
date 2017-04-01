@@ -1,11 +1,11 @@
 module.exports = {
   toneAnalyzerConfig : {
-    username : 'fd67edda-78d7-43e4-aa58-ef33dc9c71de',
-    password : 'DVy4Lz5ITEPc'
+    username : '85935d90-f46f-4e1d-bad8-11fe1dcc3d84',
+    password : 'MKhTYLFvxCWC'
   },
 
   naturalLanguageConfig : {
-    username : 'd18ae9d4-c976-413e-aa14-260c8b8b3b25',
-    password : 'NC1Ib1ONMaA5'
+    username : '2171ba9e-639c-47dc-84fa-5d5675dd1cb4',
+    password : 'ndmpqMKEM7yd'
   }
 }

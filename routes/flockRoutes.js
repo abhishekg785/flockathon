@@ -4,8 +4,11 @@ var router = express.Router();
 // abhinandan token
 var tokens = {
     'u:oc3mjgmsekn3g3cn': '1a3835a4-b09c-47eb-914c-102e8e147c4d',
-    'u:v54u6u66b90qo05o' : 'ec99497d-f54c-45be-ab88-b50843fd0e69'
+    'u:v54u6u66b90qo05o': 'ec99497d-f54c-45be-ab88-b50843fd0e69'
 };
+
+var watson = require('watson-developer-cloud');
+var watsonConfig = require('../config/watsonConfig');
 
 var userToGroupMap = {};
 
@@ -46,12 +49,24 @@ router.post('/messages', function(req, res) {
     Globals.userMessageArr[userIdIndex].push(text);
     console.log(Globals.userMessageArr);
     watson.toneAnalyzerAPI(Globals.entireMessageArr, function(data) {
-        global.io.emit('mood detect', {'mood' : JSON.stringify(data)});
+        console.log(data);
+        global.io.emit('mood detect', {
+            'mood': JSON.stringify(data)
+        });
     });
-    // console.log('calling natural language api');
+    console.log('calling natural language api');
     watson.naturalLanguageAPI(Globals.entireMessageArr, function(data) {
         console.log(data);
-        global.io.emit('mood statistics', {'mood' : data });
+        if (data.keywords.length == 0) {
+            console.log('empty');
+            global.io.emit('mood statistics', {
+                'mood': 'no data'
+            });
+        } else {
+            global.io.emit('mood statistics', {
+                'mood': data
+            });
+        }
     });
 });
 
@@ -82,29 +97,121 @@ router.get('/events/attachment', function(req, res) {
     });
 });
 
+// router.post('/api/v0.1/tagger', function(req, res, next) {
+//     console.log(req.body);
+//     var message = req.body.message;
+//     var userId = req.body.userId;
+//
+//     console.log("userto: " + userToGroupMap[userId]);
+//     console.log("token: " + tokens[userId]);
+//
+//     sendMessage(userId, message);
+//     res.send(200);
+// });
 router.post('/api/v0.1/tagger', function(req, res, next) {
     console.log(req.body);
     var message = req.body.message;
     var userId = req.body.userId;
+    var title = req.body.title;
 
     console.log("userto: " + userToGroupMap[userId]);
     console.log("token: " + tokens[userId]);
 
-    sendMessage(userId, message);
+    sendMessage(userId, message, title);
     res.send(200);
+});
+
+var NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
+var natural_language_understanding = new NaturalLanguageUnderstandingV1({
+    'username': watsonConfig.naturalLanguageConfig.username,
+    'password': watsonConfig.naturalLanguageConfig.password,
+    'version_date': '2017-02-27'
 });
 
 // api for getting tags from naturalLanguage understanding
 router.post('/api/v0.1/get-tags', function(req, res) {
     var text = req.body.text;
-    watson.naturalLanguageAPI(text, function(data) {
-        console.log(data);
-        res.end(JSON.stringify(data));
-    });
+    console.log(text);
+    var parameters = {
+        'text': text,
+        'features': {
+            'keywords': {
+                'emotion': true,
+                'sentiment': true,
+                'limit': 5
+            },
+            'entities': {
+                'emotion': true,
+                'sentiment': true,
+                'limit': 5
+            },
+            'categories': {},
+            'concepts': {
+                'limit': 1
+            },
+            'entities': {
+                'sentiment': true,
+                'limit': 1
+            }
+        }
+    }
+    natural_language_understanding.analyze(parameters, doIt);
+
+    function doIt(err, response) {
+        if (err)
+            console.log('error:', err);
+        else
+            // var res = JSON.stringify(response, null, 2);
+            //   console.log(response.keywords);
+            res.end(JSON.stringify(response, null, 2));
+    }
+    // console.log('TEXT' + text);
+    // watson.naturalLanguageAPI(text, function(data) {
+    //     console.log('IN THE CALLBACK');
+    //     console.log(data);
+    //     res.send(JSON.stringify(data));
+    // });
+
 });
 
 // using ingoing call api to send message to the group by the user
-function sendMessage(userId, message) {
+// function sendMessage(userId, message) {
+//     var request = require('request');
+//     request.post(
+//         'https://api.flock.co/v1/users.getPublicProfile', {
+//             json: {
+//                 token: tokens[userId],
+//                 userId: userId
+//             }
+//         },
+//         function(error, response, body) {
+//             if (!error && response.statusCode == 200) {
+//                 console.log(body)
+//                 request.post(
+//                     'https://api.flock.co/hooks/sendMessage/b52b6e11-f94c-494e-a08f-45de6758afc0', {
+//                         json: {
+//                             token: tokens[userId],
+//                             to: userToGroupMap[userId],
+//                             text: message,
+//                             sendAs: {
+//                                 name: body.firstName,
+//                                 profileImage: body.profileImage
+//                             }
+//                         }
+//                     },
+//                     function(error, response, body) {
+//                         if (!error && response.statusCode == 200) {
+//                             console.log(body)
+//                         }
+//                     }
+//                 );
+//             }
+//         }
+//     );
+// }
+// using ingoing call api to send message to the group by the user
+function sendMessage(userId, message, title) {
+
     var request = require('request');
     request.post(
         'https://api.flock.co/v1/users.getPublicProfile', {
@@ -116,16 +223,32 @@ function sendMessage(userId, message) {
         function(error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(body)
+                var ts = new Date().getTime();
                 request.post(
                     'https://api.flock.co/hooks/sendMessage/b52b6e11-f94c-494e-a08f-45de6758afc0', {
                         json: {
                             token: tokens[userId],
                             to: userToGroupMap[userId],
-                            text: message,
+                            // uid:ts,
+                            text: "",
                             sendAs: {
                                 name: body.firstName,
                                 profileImage: body.profileImage
-                            }
+                            },
+                            uid: ts,
+                            timestamp: ts,
+                            "attachments": [{
+                                "title": title,
+                                "description": " ",
+                                "url": "https://en.wikipedia.org/wiki/ApeScript",
+                                "views": {
+                                    "html": {
+                                        "inline": message,
+                                        "width": 400,
+                                        "height": 60
+                                    }
+                                }
+                            }]
                         }
                     },
                     function(error, response, body) {
@@ -138,5 +261,7 @@ function sendMessage(userId, message) {
         }
     );
 }
+
+
 
 module.exports = router;

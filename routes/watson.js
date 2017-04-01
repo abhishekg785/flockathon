@@ -40,11 +40,11 @@ module.exports = {
         var emotionTonesArr = emotionArr['tones'];
         // console.log(emotionTonesArr);
         emotionTonesArr.forEach(function(data) {
-          console.log(data);
+          // console.log(data);
           if (data.score > 0.5) {
             // console.log(data.tone_id);
             snappedMood.push(data.tone_name);
-            console.log(snappedMood);
+            // console.log(snappedMood);
           }
         });
         callback(snappedMood);
@@ -54,14 +54,38 @@ module.exports = {
 
   naturalLanguageAPI: function(data, callback) {
     console.log('calling natural language api');
-    console.log(data.join("\n"));
+    console.log(data);
+    var sendText;
+    if(typeof(data) != Array) {
+      sendText = data;
+    }
+    else {
+      sendText = data[data.length-1];
+    }
     var parameters = {
-      'text': data.join(". "),
+      'text': sendText,
+      // 'features': {
+      //   'entities': {
+      //     'emotion': true,
+      //     'sentiment': true,
+      //     'limit': 5
+      //   },
+      //   'keywords': {
+      //     'emotion': true,
+      //     'sentiment': true,
+      //     'limit': 5
+      //   }
+      // }
       'features': {
+        'keywords': {
+          'emotion': true,
+          'sentiment': true,
+          'limit': 5
+        },
         'entities': {
           'emotion': true,
           'sentiment': true,
-          'limit': 2
+          'limit': 5
         },
         'categories': {},
         'concepts': {
@@ -70,11 +94,6 @@ module.exports = {
         'entities': {
           'sentiment': true,
           'limit': 1
-        },
-        'keywords': {
-          'emotion': true,
-          'sentiment': true,
-          'limit': 5
         }
       }
     }
@@ -82,7 +101,9 @@ module.exports = {
       if (err)
         console.log('error:', err);
       else
-        var res = JSON.stringify(response, null, 2);
+        // var res = JSON.stringify(response, null, 2);
+        console.log(JSON.stringify(response));
+      // console.log(response);
       callback(response);
     });
   }

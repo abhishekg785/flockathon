@@ -3,33 +3,127 @@
   <title></title>
 </head>
 <body>
-  <%= userId %>
-  <textarea id="message" placeholder="Enter message here"></textarea>
-  <button id="send">Send</button>
+  <input type="text" id="title" placeholder="Enter titile" style="width: 600px; height: 50px; padding: 5px; border: 0.1px solid grey; margin: 10px; border-radius: 7px"></input><br>
+  <textarea id="message" placeholder="Enter message here" style="width: 600px; height: 300px; padding: 5px; border: 0.1px solid grey; margin: 10px; border-radius: 7px"></textarea><br>
+  <div>
+  	<ol id="tags">
+
+  	</ol>
+  </div>
+  <button id="send" style="font-family: Arial;font-size: 0.96em;border:none;color: white;width: 180px; height: 40px; background: #0abe51; border-radius: 7px">Send</button>
+  <button id="fetch" style="font-family: Arial;font-size: 0.96em;border:none;color: white;width: 180px; height: 40px; background: #0abe51; border-radius: 7px">Fetch tags</button>
+  <button id="addTags" style="font-family: Arial;font-size: 0.96em;border:none;color: white;width: 250px; height: 40px; background: #0abe51; border-radius: 7px">Add selected tags and Send</button>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script type="text/javascript" src="https://apps-static.flock.co/js-sdk/0.1.0/flock.js"></script>
   <script type="text/javascript">
-    $(document).ready(function() {
-      $('#send').click(function(e) {
-        // alert("Clicked");
-        e.preventDefault();
-        $.ajax({
-          type: "POST",
-          url: "https://359cae17.ngrok.io/flock/api/v0.1/tagger",
-          data: {
-            'userId': '<%= userId %>',
-            'message': $('#message').val()
-          },
-          dataType : 'json',
-          success: function(result) {
-            flock.close();
-          },
-          error: function(result) {
-            flock.close();
-          }
-        });
-      });
-    });
+	$(document).ready(function() {
+
+    var baseUrl = "https://ea324924.ngrok.io/";
+
+  	$('#send').click(function(e) {
+    	// alert("Clicked");
+    	e.preventDefault();
+    	$.ajax({
+      	type: "POST",
+      	url: baseUrl + "flock/api/v0.1/tagger",
+      	data: {
+        	'userId': '<%= userId %>',
+        	'message': $('#message').val(),
+        	'title': $('#title').val()
+      	},
+      	dataType : 'json',
+      	success: function(result) {
+        	flock.close();
+      	},
+      	error: function(result) {
+        	flock.close();
+      	}
+    	});
+  	});
+    	var tags = [];
+
+    	$('#fetch').click(function(event){
+
+        	// $.ajax({
+          // 	url:  baseUrl + 'flock/api/v0.1/get-tags',
+          // 	type: 'POST',
+          // 	data: {text: $('#message').val()},
+          //   async : false,
+          // 	success: function(result) {
+          //     console.log('RESULT');
+          //   	console.log(result);
+          // 	},
+          // 	error: function(err) {
+          //     console.log('in the error');
+          //     console.log(err);
+          // 	}
+        	// });
+
+
+
+        	// var tagList = $('#tags');
+        	// var tagString = "";
+        	// for(var i=0;i<tags.length;i++){
+
+        	//   console.log("here");
+        	//   $.ajax({
+        	// 	type: "GET",
+        	// 	url: "http://"+"en"+".wikipedia.org/w/api.php?action=opensearch&format=json&prop=text&section=0&"+ "&search="+tags[i]+"&limit=1" +"&callback=?",
+        	// 	contentType: "application/json; charset=utf-8",
+        	// 	async: false,
+        	// 	dataType: "json",
+        	// 	success: function(data) {
+        	//   	var len = data.length;
+        	//   	var heading = data[len-3];
+        	//   	var description = data[len-2];
+        	//   	var link = data[len-1];
+        	//   	console.log(link);
+        	//   	var tag = this.url.split('=')[5].split('&')[0];
+        	//   	tagString ='<li>'+ tag + ' : <a id="link'+tag+'" href="'+link+'">'+link+'</a> '+' <input type="checkbox" id="tag'+tag+'"></>' +'</li>';
+        	//   	tagList.append(tagString);
+        	// 	},
+        	// 	error: function(err){
+        	//   	console.log(err);
+        	// 	}
+        	//   });
+        	// }
+    	// });
+
+    	$('#addTags').click(function(event){
+        	var text = $('#message').val();
+
+        	console.log(text);
+
+        	var links = "";
+
+        	for(var i=0;i<tags.length;i++){
+          	if($('#tag'+tags[i]).prop('checked')==true){
+              	text = text.replace(tags[i],"<a target='_blank' href='" +  $('#link'+tags[i])[0] + "'>"+tags[i]+"</a>");
+          	}
+        	}
+
+        	text = '<flockml>'+'<base target="_parent" />' + text + '</flockml>'
+
+        	console.log("Final : " + text);
+        	$.ajax({
+        	type: "POST",
+        	url:  baseUrl + "flock/api/v0.1/tagger",
+        	data: {
+          	'userId': '<%= userId %>',
+          	'message': text,
+          	'title': $('#title').val()
+        	},
+        	dataType : 'json',
+        	success: function(result) {
+          	flock.close();
+        	},
+        	error: function(result) {
+          	flock.close();
+        	}
+      	});
+    	});
+
+	});
   </script>
 </body>
 </html>
