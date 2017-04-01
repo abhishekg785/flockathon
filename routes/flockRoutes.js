@@ -44,9 +44,12 @@ router.post('/messages', function(req, res) {
     }
     var userIdIndex = Globals.userIDArray.indexOf(senderID);
     Globals.userMessageArr[userIdIndex].push(text);
-    // console.log(Globals.userMessageArr);
-    // watson.toneAnalyzerAPI(Globals.entireMessageArr);
-    watson.naturalLanguageAPI(Globals.entireMessageArr);
+    console.log(Globals.userMessageArr);
+    watson.toneAnalyzerAPI(Globals.entireMessageArr, function(data) {
+        global.io.emit('mood detect', {'mood' : JSON.stringify(data)});
+    });
+    // console.log('calling natural language api');
+    // watson.naturalLanguageAPI(Globals.entireMessageArr);
 });
 
 router.post('/events', flock.events.listener);

@@ -23,7 +23,7 @@ var Globals = {
 
 module.exports = {
 
-  toneAnalyzerAPI: function(data) {
+  toneAnalyzerAPI: function(data, callback) {
     var snappedMood = [];
     data = data.join("\n");
     console.log('Data ' + data);
@@ -46,7 +46,9 @@ module.exports = {
               console.log(snappedMood);
             }
           });
+          callback(snappedMood);
       });
+      // global.io.emit('mood detect', {'mood' : JSON.stringify(snappedMood)});
   },
 
   naturalLanguageAPI: function(data) {

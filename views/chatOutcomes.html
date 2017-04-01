@@ -5,7 +5,15 @@
   <h1>Chat Outcomes</h1>
   <script src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script>
-    
+    var socket = io();
+    socket.connect();
+
+    // socket.on('mood detect', function(mood) {
+    //   console.log(mood);
+    // });
+    socket.on('mood detect', function(mood) {
+      console.log(mood);
+    });
   </script>
 </body>
 </html>
