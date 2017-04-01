@@ -44,9 +44,8 @@ router.post('/messages', function(req, res) {
     }
     var userIdIndex = Globals.userIDArray.indexOf(senderID);
     Globals.userMessageArr[userIdIndex].push(text);
-    console.log(Globals.userMessageArr);
-    watson.toneAnalyzerAPI(Globals.entireMessageArr);
-    console.log('calling natural language api');
+    // console.log(Globals.userMessageArr);
+    // watson.toneAnalyzerAPI(Globals.entireMessageArr);
     watson.naturalLanguageAPI(Globals.entireMessageArr);
 });
 

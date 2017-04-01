@@ -16,11 +16,17 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
   'version_date': '2017-02-27'
 });
 
+var Globals = {
+  moodCategory : ['emotion_tone', 'language_tone', 'social_tone'],
+  moodIDArr : ['anger', 'disgust', 'fear', 'joy', 'sadness']
+}
+
 module.exports = {
 
   toneAnalyzerAPI: function(data) {
-    console.log(data);
-    data = data.join(". ");
+    var snappedMood = [];
+    data = data.join("\n");
+    console.log('Data ' + data);
     tone_analyzer.tone({
         text: data
       },
@@ -28,13 +34,26 @@ module.exports = {
         if (err)
           console.log(err);
         else
-          console.log(JSON.stringify(tone, null, 2));
+          // console.log(JSON.stringify(tone, null, 2));
+          // console.log(tone.document_tone['tone_categories'][0]);
+          var emotionArr = tone.document_tone['tone_categories'][0];
+          var emotionTonesArr = emotionArr['tones'];
+          // console.log(emotionTonesArr);
+          emotionTonesArr.forEach(function(data) {
+            if(data.score > 0.5) {
+              // console.log(data.tone_id);
+              snappedMood.push(data.tone_name);
+              console.log(snappedMood);
+            }
+          });
       });
   },
 
   naturalLanguageAPI: function(data) {
+    console.log('calling natural language api');
+    console.log(data.join("\n"));
     var parameters = {
-      'text': 'facebook is awesome',
+      'text': data.join(". "),
       'features': {
         'entities': {
           'emotion': true,

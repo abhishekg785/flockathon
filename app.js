@@ -15,6 +15,7 @@ flock.setAppSecret(flockConig.appSecret);
 
 var routes = require('./routes/index');
 var flock = require('./routes/flockRoutes.js');
+var chatOutcomes = require('./routes/chatOutcomes');
 
 var app = express();
 
@@ -35,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/flock', flock);
+app.use('/chat', chatOutcomes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
