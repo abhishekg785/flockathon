@@ -1,19 +1,52 @@
 <html>
+
 <head>
 </head>
+
 <body>
   <h1>Chat Outcomes</h1>
-  <script src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.js"></script>
   <script>
     var socket = io();
     socket.connect();
 
+    _Functions = {
+      createStatisticsGraph: function(obj) {
+        var heightFactor = 5,
+          svgHeight = 800,
+          svgWidth = 500,
+          barPadding = 3,
+          svgTextPdding = 5;
+
+        var visualSVG = d3.select('#visualSVG').append('svg')
+          .attr('height', svgHeight)
+          .attr('width', svgWidth)
+        var visualRect = visualSVG.selectAll('rect')
+          .data(obj)
+          .enter()
+          .append('rect')
+          .attr('height', function(d) {
+            console.log(d);
+            // return heightFactor * d.value;
+          })
+      }
+    }
     // socket.on('mood detect', function(mood) {
     //   console.log(mood);
     // });
     socket.on('mood detect', function(mood) {
       console.log(mood);
     });
+
+    socket.on('mood statistics', function(moodStats) {
+      console.log('mood statistics');
+      var dataArr = [];
+      console.log(moodStats.mood.keywords[0]);
+      var obj = moodStats.mood.keywords[0]['emotion'];
+      console.log(obj);
+    });
   </script>
 </body>
+
 </html>

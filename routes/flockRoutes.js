@@ -49,14 +49,16 @@ router.post('/messages', function(req, res) {
         global.io.emit('mood detect', {'mood' : JSON.stringify(data)});
     });
     // console.log('calling natural language api');
-    // watson.naturalLanguageAPI(Globals.entireMessageArr);
+    watson.naturalLanguageAPI(Globals.entireMessageArr, function(data) {
+        console.log(data);
+        global.io.emit('mood statistics', {'mood' : data });
+    });
 });
 
 router.post('/events', flock.events.listener);
 
 // install the app
 flock.events.on('app.install', function(event) {
-    console.log('fvflvnflv');
     tokens[event.userId] = event.token;
 });
 
@@ -90,6 +92,15 @@ router.post('/api/v0.1/tagger', function(req, res, next) {
 
     sendMessage(userId, message);
     res.send(200);
+});
+
+// api for getting tags from naturalLanguage understanding
+router.post('/api/v0.1/get-tags', function(req, res) {
+    var text = req.body.text;
+    watson.naturalLanguageAPI(text, function(data) {
+        console.log(data);
+        res.end(JSON.stringify(data));
+    });
 });
 
 // using ingoing call api to send message to the group by the user
