@@ -5,6 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+// flock params
+var flock = require('flockos');
+var flockConig = require('./config/flockConfig');
+
+// set flock params
+flock.setAppId(flockConig.appId);
+flock.setAppSecret(flockConig.appSecret);
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
@@ -22,6 +30,24 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// flock
+app.use(flock.events.tokenVerifier);
+app.post('/events', flock.events.listener);
+
+app.get('/events', function(req, res) {
+	res.end('<h1>Hi</h1>');
+});
+
+// save tokens on app.install
+flock.events.on('app.install', function (event) {
+    tokens[event.userId] = event.token;
+});
+
+// delete tokens on app.uninstall
+flock.events.on('app.uninstall', function (event) {
+    delete tokens[event.userId];
+});
 
 app.use('/', routes);
 app.use('/users', users);
