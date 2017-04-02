@@ -7,6 +7,8 @@ var tokens = {
     'u:v54u6u66b90qo05o': 'ec99497d-f54c-45be-ab88-b50843fd0e69'
 };
 
+var tagString = "";
+
 var watson = require('watson-developer-cloud');
 var watsonConfig = require('../config/watsonConfig');
 
@@ -54,9 +56,7 @@ router.post('/messages', function(req, res) {
             'mood': JSON.stringify(data)
         });
     });
-    console.log('calling natural language api');
     watson.naturalLanguageAPI(Globals.entireMessageArr, function(data) {
-        console.log(data);
         if (data.keywords.length == 0) {
             console.log('empty');
             global.io.emit('mood statistics', {
@@ -128,6 +128,10 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
     'version_date': '2017-02-27'
 });
 
+router.post('/getTags', function(req, res) {
+    res.send(tagString);
+});
+
 // api for getting tags from naturalLanguage understanding
 router.post('/api/v0.1/get-tags', function(req, res) {
     var text = req.body.text;
@@ -163,7 +167,8 @@ router.post('/api/v0.1/get-tags', function(req, res) {
         else
             // var res = JSON.stringify(response, null, 2);
             //   console.log(response.keywords);
-            res.end(JSON.stringify(response, null, 2));
+            tagString = JSON.stringify(response, null, 2);
+        res.end(JSON.stringify(response, null, 2));
     }
     // console.log('TEXT' + text);
     // watson.naturalLanguageAPI(text, function(data) {
@@ -173,6 +178,7 @@ router.post('/api/v0.1/get-tags', function(req, res) {
     // });
 
 });
+
 
 // using ingoing call api to send message to the group by the user
 // function sendMessage(userId, message) {

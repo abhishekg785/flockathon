@@ -6,6 +6,7 @@
   <input type="text" id="title" placeholder="Enter titile" style="width: 600px; height: 50px; padding: 5px; border: 0.1px solid grey; margin: 10px; border-radius: 7px"></input><br>
   <textarea id="message" placeholder="Enter message here" style="width: 600px; height: 300px; padding: 5px; border: 0.1px solid grey; margin: 10px; border-radius: 7px"></textarea><br>
   <div>
+    <span id="refHead" style="font-family: Arial; font-size: 1.2em; color: grey; display: none">References</span>
   	<ol id="tags">
 
   	</ol>
@@ -18,7 +19,7 @@
   <script type="text/javascript">
 	$(document).ready(function() {
 
-    var baseUrl = "https://ea324924.ngrok.io/";
+    var baseUrl = "https://9b2468bc.ngrok.io/";
 
   	$('#send').click(function(e) {
     	// alert("Clicked");
@@ -44,20 +45,74 @@
 
     	$('#fetch').click(function(event){
 
-        	// $.ajax({
-          // 	url:  baseUrl + 'flock/api/v0.1/get-tags',
-          // 	type: 'POST',
-          // 	data: {text: $('#message').val()},
-          //   async : false,
-          // 	success: function(result) {
-          //     console.log('RESULT');
-          //   	console.log(result);
-          // 	},
-          // 	error: function(err) {
-          //     console.log('in the error');
-          //     console.log(err);
-          // 	}
-        	// });
+        	$.ajax({
+          	url:  baseUrl + 'flock/api/v0.1/get-tags',
+          	type: 'POST',
+          	data: {text: $('#message').val()},
+          	success: function(result) {
+
+              setTimeout(function(){
+                  $.ajax({
+                  url:  baseUrl + 'flock/getTags',
+                  type: 'POST',
+                  success: function(result) {
+                    console.log('**RESULT***');
+                    // console.log(result);
+                    var data = JSON.parse(result);
+                    var keywords = data.keywords;
+
+                    for(var i=0;i<keywords.length; i++){
+                      tags.push(keywords[i].text);
+                      console.log(keywords[i].text);
+                    }
+
+
+                    var tagList = $('#tags');
+                    var tagString = "";
+                    for(var i=0;i<tags.length;i++){
+
+                      console.log("here");
+                      $.ajax({
+                     type: "GET",
+                     url: "https://"+"en"+".wikipedia.org/w/api.php?action=opensearch&format=json&prop=text&section=0&"+ "&search="+tags[i]+"&limit=1" +"&callback=?",
+                     contentType: "application/json; charset=utf-8",
+                     async: false,
+                     dataType: "json",
+                     success: function(data) {
+                       var len = data.length;
+                       var heading = data[len-3];
+                       var description = data[len-2];
+                       var link = data[len-1];
+                       console.log(link);
+                       if(link!='undefined' && link!=""){
+                         var tag = this.url.split('=')[5].split('&')[0];
+                         tagString ='<li style="font-family:Arial;">'+ tag + ' : <a style="color: #0abe51;" id="link'+tag+'" href="'+link+'">'+link+'</a> '+' <input type="checkbox" id="tag'+tag+'"></>' +'</li>';
+                         if($('#refHead').css('display') == 'none'){
+                          $('#refHead').css('display','block');
+                        }
+                         tagList.append(tagString);
+                       }
+                     },
+                     error: function(err){
+                       console.log(err);
+                     }
+                      });
+                    }
+
+                  },
+                  error: function(err) {
+                    console.log('in the error inside');
+                    console.log(err);
+                  }
+                });
+              },2000);
+
+          	},
+          	error: function(err) {
+              console.log('in the error');
+              console.log(err);
+          	}
+        	});
 
 
 
@@ -87,12 +142,10 @@
         	// 	}
         	//   });
         	// }
-    	// });
+    	});
 
     	$('#addTags').click(function(event){
         	var text = $('#message').val();
-
-        	console.log(text);
 
         	var links = "";
 

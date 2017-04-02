@@ -54,14 +54,16 @@ module.exports = {
 
   naturalLanguageAPI: function(data, callback) {
     console.log('calling natural language api');
-    console.log(data);
     var sendText;
-    if(typeof(data) != Array) {
+    console.log(typeof(data));
+    if(typeof(data) != 'object') {
       sendText = data;
     }
     else {
+      console.log('Came here');
       sendText = data[data.length-1];
     }
+    console.log(sendText);
     var parameters = {
       'text': sendText,
       // 'features': {
