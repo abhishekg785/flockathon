@@ -31,17 +31,21 @@
       font-family: Arial;
     }
 
-    #anger, #sadness, #fear, #disgust, #joy{
+    #anger,
+    #sadness,
+    #fear,
+    #disgust,
+    #joy {
       margin: 20px;
-      color:white;
+      color: white;
       font-size: 1.1em;
       font-family: Arial;
       font-weight: 500;
       margin-left: 40px;
     }
 
-    #sentimentProb{
-      color:white;
+    #sentimentProb {
+      color: white;
       margin-top: 20px;
       font-size: 1.4em;
       text-align: center;
@@ -90,14 +94,15 @@
           .attr('width', svgWidth)
           .attr('x', 200)
           .attr('y', 200)
+
         var visualRect = visualSVG.selectAll('rect')
           .data(obj)
           .enter()
           .append('rect')
-          .attr('height', function(d) {
-            console.log(d);
-            return heightFactor * d.val;
-          })
+          // .attr('height', function(d) {
+          //   console.log(d);
+          //   return heightFactor * d.val;
+          // })
           .attr('width', function(d) {
             return svgWidth / obj.length - barPadding;
           })
@@ -113,6 +118,16 @@
           .attr('fill', 'white')
           .attr('color', 'black')
           .attr('stroke', 'black')
+          .attr("height", 0)
+          .transition()
+          .duration(200)
+          .delay(function(d, i) {
+            return i * 100;
+          })
+          .attr('height', function(d) {
+            console.log(d);
+            return heightFactor * d.val;
+          })
 
         function createSVGtexts() {
           var visualText = visualSVG.selectAll('text')
@@ -179,12 +194,12 @@
           });
           console.log(dataArr);
 
-          document.getElementById("sentimentProb").innerHTML ="Detailed sentimental probabilities";
-          document.getElementById("anger").innerHTML ="Anger : "+(dataArr[0].val);
-          document.getElementById("disgust").innerHTML ="Disgust : "+(dataArr[1].val);
-          document.getElementById("fear").innerHTML ="Fear : "+(dataArr[2].val);
-          document.getElementById("joy").innerHTML ="Joy : "+(dataArr[3].val);
-          document.getElementById("sadness").innerHTML ="Sadness : "+(dataArr[4].val);
+          document.getElementById("sentimentProb").innerHTML = "Detailed sentimental probabilities";
+          document.getElementById("anger").innerHTML = "Anger : " + (dataArr[0].val);
+          document.getElementById("disgust").innerHTML = "Disgust : " + (dataArr[1].val);
+          document.getElementById("fear").innerHTML = "Fear : " + (dataArr[2].val);
+          document.getElementById("joy").innerHTML = "Joy : " + (dataArr[3].val);
+          document.getElementById("sadness").innerHTML = "Sadness : " + (dataArr[4].val);
 
           _Functions.createStatisticsGraph(dataArr);
         }
@@ -193,6 +208,7 @@
       }
     });
 
+    // for testing
     // dataArr = [
     //   {
     //     'mood': 'anger',
@@ -216,7 +232,6 @@
     //   }
     // ];
     // _Functions.createStatisticsGraph(dataArr);
-
   </script>
 </body>
 
